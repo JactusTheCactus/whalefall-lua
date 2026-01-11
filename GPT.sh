@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-exec > README.md
+exec > GPT.md
 echo Thoughts?
 declare -A files
 files[.sh]=sh
