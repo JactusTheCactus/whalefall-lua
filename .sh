@@ -14,7 +14,7 @@ mkdir -p bin dist logs
 make &> logs/make.log
 if flag local
 	then ./bin/love dist
-	else npx serve "bin/$TITLE"
+	#else npx serve "bin/$TITLE"
 fi
 if [[ "$(<logs/make.log)" = "make: Nothing to be done for 'ALL'." ]]
 	then rm logs/make.log
