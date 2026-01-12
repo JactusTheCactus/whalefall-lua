@@ -1,7 +1,7 @@
 function love.conf(t)
 	t.window.title = "Whalefall"
-	t.window.width = 0
-	t.window.height = 0
+	-- t.window.width = 0
+	-- t.window.height = 0
 	t.window.resizable = true
 	-- t.modules.audio = true -- Disabling breaks WASM
 	-- t.modules.data = true

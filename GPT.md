@@ -1,7 +1,9 @@
 Thoughts?
 # `data.env`
 ```env
-TITLE="Whalefall"
+TITLE=Whalefall
+SITE=false
+LOVE=bin/love
 ```
 # `.sh`
 ```sh
@@ -13,15 +15,13 @@ flag() {
 	done
 }
 source data.env
-TITLE=`echo "$TITLE" | perl -pe 's|/|_|g'`
 [[ -d node_modules ]] || npm ci
 make clean
 rm -rf logs
 mkdir -p bin dist logs
 make &> logs/make.log
 if flag local
-	then ./bin/love dist
-	#else npx serve "bin/$TITLE"
+	then "$SITE" && npx serve "bin/$TITLE" || "./$LOVE" dist
 fi
 if [[ "$(<logs/make.log)" = "make: Nothing to be done for 'ALL'." ]]
 	then rm logs/make.log
@@ -35,26 +35,25 @@ find -empty -delete
 SHELL := /usr/bin/bash
 .PHONY := all clean
 include data.env
-VER := 11.5
-TITLE := $(shell echo '$(TITLE)' | perl -pe 's/^"|"$$//g')
 LUA_IN := $(wildcard src/*.lua)
 LUA_OUT := $(patsubst src/%.lua,dist/%.lua,$(LUA_IN))
-all : bin/love $(LUA_OUT) bin/$(TITLE)
-bin/love :
+all : $(LOVE) $(LUA_OUT) bin/$(TITLE)
+$(LOVE) :
+	VER=11.5
 	curl -L \
-		"https://github.com/love2d/love/releases/download/$(VER)/love-$(VER)-x86_64.AppImage" \
-		-o bin/love \
+		"https://github.com/love2d/love/releases/download/$$VER/love-$$VER-x86_64.AppImage" \
+		-o $(LOVE) \
 		&> /dev/null \
-		&& chmod +x bin/love
+		&& chmod +x $(LOVE)
 $(LUA_OUT) : $(LUA_IN) data.env
 	while read -r i
 		do cat $$i \
-			| perl -pe "s|<title>|$(shell echo '$(TITLE)' | perl -pe 's/\|/_/g')|g" \
+			| perl -pe "s|<title>|$(TITLE)|g" \
 			> "dist/$${i#src/}"
 	done < <(find src -name "*.lua")
 bin/$(TITLE) : $(LUA_OUT)
 	npx love.js \
-		dist "bin/$(shell echo '$(TITLE)' | perl -pe 's|[/]|_|g')" \
+		dist "bin/$(TITLE)" \
 		-t "$(TITLE)" \
 		-m "$$(((2 ** 6) * (1024 ** 2)))" \
 		-c

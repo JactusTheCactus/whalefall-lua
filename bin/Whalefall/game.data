@@ -1,7 +1,7 @@
 function love.conf(t)
 	t.window.title = "Whalefall"
-	t.window.width = 0
-	t.window.height = 0
+	-- t.window.width = 0
+	-- t.window.height = 0
 	t.window.resizable = true
 	-- t.modules.audio = true -- Disabling breaks WASM
 	-- t.modules.data = true
@@ -22,17 +22,78 @@ function love.conf(t)
 	-- t.modules.video = true
 	-- t.modules.window = true
 end
--- function love.load() end
--- function love.update() end
+function resize()
+	WIDTH = love.graphics.getWidth()
+	HEIGHT = love.graphics.getHeight()
+end
+function love.load() resize() end
+function love.resize() resize() end
+function create(width, height, x, y)
+	local toPercent = function(axis, n)
+		return axis * n / 100
+	end
+	local center = function(axis, coord, size)
+		return toPercent(axis, coord or 50) - (size / 2)
+	end
+	local obj = {}
+	-- Width & Height
+	obj.width = toPercent(WIDTH, width or 0)
+	obj.height = toPercent(HEIGHT, height or width or 0)
+	-- X & Y Coords
+	obj.x = center(WIDTH, x, obj.width)
+	obj.y = center(HEIGHT, y, obj.height)
+	--
+	return obj
+end
+function text(options)
+	options = options or {}
+	options.content = options.content or ""
+	options.align = options.align or "center"
+	options.scale = options.scale or 1
+	t = create(options.width, options.height, options.x, options.y)
+	local font = love.graphics.getFont()
+	local textWidth = font:getWidth(options.content)
+	local scaledTextWidth = textWidth * options.scale
+	local boxCenter = t.width / 2
+	local textCenter = scaledTextWidth / 2
+	local screenOffset = textCenter - boxCenter
+	local xOffset = screenOffset / options.scale
+	-- xOffset = options.scale * (t.width * 0.125) -- Scaling offsets the text. This is meant to fix that
+	print(xOffset)
+	love.graphics.printf(
+		options.content,
+		t.x,
+		t.y,
+		t.width,
+		options.align,
+		0,
+		options.scale,
+		options.scale,
+		xOffset,
+		0
+	)
+end
+-- function love.update(dt) end
 function love.draw()
+	tmp = create(25, nil, 50, 75)
+	love.graphics.rectangle("fill", tmp.x, tmp.y, tmp.width, tmp.height)
 	love.graphics.setColor(1, 1, 1)
-	love.graphics.print("Welcome to 'Whalefall'!", 50, 50)
-	love.graphics.rectangle("fill", 100, 100, 100, 100)
+	text()
+	text{
+		content = "Welcome to 'Whalefall'!",
+		width = 50,
+		x = 50,
+		scale = 1
+	}
+	square = create(25, nil, 50, 75)
+	love.graphics.rectangle(
+		"fill",
+		square.x,
+		square.y,
+		square.width,
+		square.height
+	)
 end
-function love.quit()
-	print("Closing Whalefall...")
-end
--- function love.resize() end
--- function love.keypressed() end
+-- function love.quit() end
 -- function love.mousepressed() end
 -- function love.touchpressed() end
